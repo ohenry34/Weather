@@ -1,9 +1,8 @@
 library(tidyverse)
 library(stringr)
 
-af305_28 <- recon_AF305.0909A.IDA
-
-names(af305_28) <- c("Time",
+transform_df <- function(df){
+  names(df) <- c("Time",
                      "Latitude",
                      "Longitude",
                      "Aircraft Pressure",
@@ -16,9 +15,8 @@ names(af305_28) <- c("Time",
                      "Peak Surface Wind (SMFR)",
                      "Rain Rate",
                      "Error Code")
-
-af305_28 %>%
-  mutate(
+  df %>%
+    mutate(
     Time = paste0(substring(Time, 1, 1), ":", 
                   substring(Time, 2, 3), ":", 
                   substring(Time, 4, 5)),
@@ -75,6 +73,7 @@ af305_28 %>%
     `Rain Rate` = as.numeric(ifelse(`Rain Rate` == "///", NA, `Rain Rate`))
     )%>%
   select(-9)
+}
 
 
   
