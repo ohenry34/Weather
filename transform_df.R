@@ -1,6 +1,7 @@
 library(tidyverse)
 library(stringr)
 
+
 transform_df <- function(df){
   names(df) <- c("Time",
                      "Latitude",
@@ -15,20 +16,21 @@ transform_df <- function(df){
                      "Peak Surface Wind (SMFR)",
                      "Rain Rate",
                      "Error Code")
+
   df %>%
     mutate(
-    Time = paste0(substring(Time, 1, 1), ":", 
-                  substring(Time, 2, 3), ":", 
-                  substring(Time, 4, 5)),
-    Latitude = paste0(substring(Latitude, 1, 2), ".", 
-                      substring(Latitude, 3, 4), "\u00B0", 
+    Time = as.POSIXct(strptime(paste0(substring(str_pad(Time, 6, pad = "0"), 1, 2), ":",
+                  substring(str_pad(Time, 6, pad = "0"), 3, 4), ":",
+                  substring(str_pad(Time, 6, pad = "0"), 5, 6)), "%H:%M:%S")),
+    Latitude = paste0(substring(Latitude, 1, 2), ".",
+                      substring(Latitude, 3, 4), "\u00B0",
                       substring(Latitude, 5, 5)),
     Longitude = ifelse(as.numeric(substring(Longitude, 1, 5)) < 10000,
-           paste0(substring(Longitude, 2, 3), ".", 
-                              substring(Longitude, 4, 5), "\u00B0", 
+           paste0(substring(Longitude, 2, 3), ".",
+                              substring(Longitude, 4, 5), "\u00B0",
                               substring(Longitude, 6, 6)),
-           paste0(substring(Longitude, 1, 3), ".", 
-                              substring(Longitude, 4, 5), "\u00B0", 
+           paste0(substring(Longitude, 1, 3), ".",
+                              substring(Longitude, 4, 5), "\u00B0",
                               substring(Longitude, 6, 6))),
     `Aircraft Pressure` = ifelse(`Aircraft Pressure` > 1000,
                                  `Aircraft Pressure` / 10,
@@ -56,11 +58,12 @@ transform_df <- function(df){
                                    ))),
     `Wind Direction` = suppressWarnings(ifelse(`Wind Direction and Speed` == "//////",
                                           NA,
-                                          substring(str_pad(`Wind Direction and Speed`, 6, pad = "0"), 1, 3)
+                                          as.numeric(substring(str_pad(`Wind Direction and Speed`, 6, pad = "0"), 1, 3))
                                           )),
     `Wind Speed` = suppressWarnings(ifelse(`Wind Direction and Speed` == "//////",
                                                NA,
-                                               substring(str_pad(`Wind Direction and Speed`, 6, pad = "0"), 4, 6)
+                                               as.numeric(
+                                                 substring(str_pad(`Wind Direction and Speed`, 6, pad = "0"), 4, 6))
                                           )),
     `Peak Flight-Level Wind (10s)` = as.numeric(suppressWarnings(ifelse(`Peak Flight-Level Wind (10s)` == "///",
                                                              NA,
@@ -69,14 +72,13 @@ transform_df <- function(df){
     `Peak Surface Wind (SMFR)` = as.numeric(suppressWarnings(ifelse(`Peak Surface Wind (SMFR)` == "///",
                                                 NA,
                                                 `Peak Surface Wind (SMFR)`)
-    )), 
+    )),
     `Rain Rate` = as.numeric(ifelse(`Rain Rate` == "///", NA, `Rain Rate`))
     )%>%
   select(-9)
 }
 
 
-  
-  
-  
-  
+
+
+
